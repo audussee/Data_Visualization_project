@@ -14,14 +14,16 @@ data_files = {
     "Belgium": "Country_csv/Belgium.csv",
     "Italy": "Country_csv/Italy.csv",
     "Spain": "Country_csv/Spain.csv",
-    "United Kingdom of Great Britain and Northern Ireland": "Country_csv/England.csv",
-    "Netherlands, Kingdom of the": "Country_csv/Netherlands.csv",
+    "United Kingdom": "Country_csv/England.csv",
+    "Netherlands": "Country_csv/Netherlands.csv",
     "Switzerland": "Country_csv/Switzerland.csv",
     "Portugal": "Country_csv/Portugal.csv",
 }
 
 # Load CSVs into a dictionary of dataframes
-dataframes = {country: pd.read_csv(file) for country, file in data_files.items()}
+dataframes = {
+    country: pd.read_csv(file, index_col=False) for country, file in data_files.items()
+}
 dataframes_all = pd.concat([dataframes[country] for country in dataframes.keys()])
 
 # -- Mapping of ISO 3166-1 alpha-3 codes to country names --
@@ -195,7 +197,9 @@ def update_all(event=None):
     )
 
     bar_pane.object = bars
-    df_pane.object = df_week[["rank", "track_name", "artist_names", "streams"]]
+    df_pane.object = df_week[
+        ["rank", "track_name", "artist_names", "streams"]
+    ].style.hide(axis="index")
 
     # Function to update details when song changes
     def update_song_details(event=None):
@@ -275,6 +279,7 @@ app = pn.Column(
         "The bar chart below shows the top 10 songs in your selected country and week."
     ),
     pn.Column(bar_pane),
+    pn.Spacer(height=20),
     pn.pane.Markdown("### 3. Full weekly ranking"),
     pn.pane.Markdown(
         "This table provides all the available songs for the selected country and week."
@@ -288,11 +293,6 @@ app = pn.Column(
     map_mode_toggle,
     pn.Column(map_pane),
     pn.pane.Markdown("### 5. Song details"),
-    pn.pane.Markdown(
-        "Detailed information about the selected song, including its rank, artists, and streams."
-    ),
-    df_song_detail,
-    pn.pane.Markdown("### 6. Stream Evolution Over Time"),
     pn.pane.Markdown(
         "This chart shows how the number of streams for the selected song evolved in the selected country."
     ),
